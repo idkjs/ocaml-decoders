@@ -207,20 +207,19 @@ let read_all = (ic): string => {
   let len = ref(0);
   try(
     {
-      while (true)
-        {
-          /* resize */
-          if (len^ == Bytes.length(buf^)) {
-            buf := Bytes.extend(buf^, 0, len^);
-          };
-          assert(Bytes.length(buf^) > len^);
-          let n = input(ic, buf^, len^, Bytes.length(buf^) - len^);
-          len := len^ + n;
-          if (n == 0) {
-            raise(Exit);
-          };
+      while (true) {
+        /* resize */
+        if (len^ == Bytes.length(buf^)) {
+          buf := Bytes.extend(buf^, 0, len^);
         };
-        /* exhausted */
+        assert(Bytes.length(buf^) > len^);
+        let n = input(ic, buf^, len^, Bytes.length(buf^) - len^);
+        len := len^ + n;
+        if (n == 0) {
+          raise(Exit);
+        };
+      };
+      /* exhausted */
       assert(false);
     }
   ) {

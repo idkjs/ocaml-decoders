@@ -33,7 +33,7 @@ let yojson_basic_suite = {
     >:: (
       _ => {
         let tree_decoder =
-          fix(tree_decoder =>
+          fix(tree_decoder => {
             let leaf_decoder = int |> map(i => Leaf(i));
             let node_decoder =
               Pipeline.(
@@ -43,7 +43,7 @@ let yojson_basic_suite = {
               );
 
             one_of([("leaf", leaf_decoder), ("node", node_decoder)]);
-          );
+          });
 
         decoder_test(
           ~decoder=tree_decoder,
@@ -82,7 +82,7 @@ let yojson_basic_suite = {
         };
         open M;
         let t1_decoder =
-          fix(t1_decoder =>
+          fix(t1_decoder => {
             let t2 =
               nullable(field("t1", t1_decoder))
               |> map(
@@ -100,7 +100,7 @@ let yojson_basic_suite = {
                  );
 
             t1;
-          );
+          });
 
         decoder_test(
           (),
@@ -305,7 +305,7 @@ let yojson_raw_suite = {
     >:: (
       _ => {
         let tree_decoder =
-          fix(tree_decoder =>
+          fix(tree_decoder => {
             let leaf_decoder = int |> map(i => Leaf(i));
             let node_decoder =
               Pipeline.(
@@ -315,7 +315,7 @@ let yojson_raw_suite = {
               );
 
             one_of([("leaf", leaf_decoder), ("node", node_decoder)]);
-          );
+          });
 
         decoder_test(
           ~decoder=tree_decoder,

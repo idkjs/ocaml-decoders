@@ -1,4 +1,4 @@
-(lang dune 2.7)
+(lang dune 2.8)
 (name decoders)
 (using action-plugin 0.1)
 (generate_opam_files true)
