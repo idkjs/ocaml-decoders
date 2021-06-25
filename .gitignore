@@ -6,3 +6,6 @@ _opam
 .bsb.lock
 /lib/
 /node_modules/
+_esy
+.melange.eobjs
+.vscode
