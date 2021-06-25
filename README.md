@@ -41,38 +41,38 @@ Now we can start decoding stuff!
 First, a module alias to save some keystrokes. In this guide, we'll parse JSON
 using `Yojson`'s `Basic` variant.
 
-```ocaml
-utop # module D = Decoders_yojson.Basic.Decode;;
+```reason
+rtop # module D = Decoders_yojson.Basic.Decode;
 module D = Decoders_yojson.Basic.Decode
 ```
 
 Let's set our sights high and decode an integer.
 
-```ocaml
-utop # D.decode_value D.int (`Int 1);;
+```reason
+rtop # D.decode_value(D.int, `Int(1));
 - : (int, error) result = Ok 1
 ```
 
 Nice! We used `decode_value`, which takes a `decoder` and a `value` (in this
 case a `Yojson.Basic.json`) and... decodes the value.
 
-```ocaml
-utop # D.decode_value;;
+```reason
+rtop # D.decode_value;
 - : 'a decoder -> value -> ('a, error) result = <fun>
 ```
 
 For convenience we also have `decode_string`, which takes a `string` and calls
 `Yojson`'s parser under the hood.
 
-```ocaml
-utop # D.decode_string D.int "1";;
+```reason
+rtop # D.decode_string(D.int, "1");
 - : (int, error) result = Ok 1
 ```
 
 What about a `list` of `int`s? Here's where the "combinator" part comes in.
 
-```ocaml
-utop # D.decode_string D.(list int) "[1,2,3]";;
+```reason
+rtop # D.decode_string(D.(list(int)), "[1,2,3]");
 - : (int list, error) result = Ok [1; 2; 3]
 ```
 
@@ -80,9 +80,9 @@ Success!
 
 Ok, so what if we get some unexpected JSON?
 
-```ocaml
-utop # #install_printer D.pp_error;;
-utop # D.decode_string D.(list int) "[1,2,true]";;
+```reason
+rtop # #install_printer D.pp_error;;
+rtop # D.decode_string(D.(list(int)), "[1,2,true]");
 - : (int list, error) result =
 Error while decoding a list: element 2: Expected an int, but got true
 ```
@@ -92,30 +92,37 @@ Error while decoding a list: element 2: Expected an int, but got true
 To decode a JSON object with many fields, we can use the let-binding operators
 (`let*`, etc.) from the `Infix` module.
 
-```ocaml
-type my_user =
-  { name : string
-  ; age : int
-  }
+```reason
+type my_user = {
+  name: string,
+  age: int,
+};
 
-let my_user_decoder : my_user decoder =
-  let open D in
-  let* name = field "name" string in
-  let* age = field "age" int in
-  succeed { name; age }
+let my_user_decoder: decoder(my_user) = (
+  {
+    open D;
+    let* name = field("name", string);
+    let* age = field("age", int);
+    succeed({name, age});
+  }:
+    decoder(my_user)
+);
 ```
 
 > *Note for Bucklescript users*: let-binding operators are not currently available
 > in Bucklescript, so if you need your decoders to be compatible with Bucklescript
 > you can use the monadic bind operator (`>>=`):
-> 
-> ```ocaml
-> let my_user_decoder : my_user decoder =
->   let open D in
->   field "name" string >>= fun name ->
->   field "age" int >>= fun age ->
->   succeed { name; age }
+>
+> ```reason
+> let my_user_decoder: decoder(my_user) = (
+>  D.(
+>    field("name", string)
+>    >>= (name => field("age", int) >>= (age => succeed({name, age})))
+>  ):
+>    decoder(my_user)
+>);
 > ```
+
 
 We can also use these operators to decode objects with inconsistent structure. Say, for
 example, our JSON is a list of shapes. Squares have a side length, circles have
@@ -129,37 +136,29 @@ a radius, and triangles have a base and a height.
 
 We could represent these types in OCaml and decode them like this:
 
-```ocaml
+```reason
 type shape =
-  | Square of int
-  | Circle of int
-  | Triangle of int * int
+  | Square(int)
+  | Circle(int)
+  | Triangle(int, int);
 
-let square_decoder : shape decoder =
-  D.(let+ s = field "side" int in Square s)
+let square_decoder: decoder(shape) = (
+  {
+    open D;
+    let+ s = field("side", int);
+    Square(s);
+  }:
+    decoder(shape)
+);
 
-let circle_decoder : shape decoder =
-  D.(let+ r = field "radius" int in Circle r)
-
-let triangle_decoder : shape decoder =
-  D.(
-    let* b = field "base" int in
-    let+ h = field "height" int in
-    Triangle (b, h)
-  )
-
-let shape_decoder : shape decoder =
-  let open D in
-  let* shape = field "shape" string in
-  match shape with
-  | "square" -> square_decoder
-  | "circle" -> circle_decoder
-  | "triangle" -> triangle_decoder
-  | _ -> fail "Expected a shape"
-
-
-let decode_list (json_string : string) : (shape list, _) result =
-  D.(decode_string (list shape_decoder) json_string)
+let circle_decoder: decoder(shape) = (
+  {
+    open D;
+    let+ r = field("radius", int);
+    Circle(r);
+  }:
+    decoder(shape)
+);
 ```
 
 Now, say that we didn't have the benefit of the `"shape"` field describing the
@@ -170,7 +169,7 @@ each decoder in turn using the `one_of` combinator.
 turn. The `string` element of each pair is just used to name the decoder in
 error messages.
 
-```ocaml
+```reason
 let shape_decoder_2 : shape decoder =
   D.(
     one_of
@@ -187,46 +186,57 @@ let shape_decoder_2 : shape decoder =
 Suppose our program deals with users and roles. We want to decode our JSON input
 into these types.
 
-```ocaml
-type role = Admin | User
+```reason
+type role =
+  | Admin
+  | User;
 
-type user =
-  { name : string
-  ; roles : role list
-  }
+type user = {
+  name: string,
+  roles: list(role),
+};
 ```
 
 Let's define our decoders. We'll write a module functor so we can re-use the
 same decoders across different JSON libraries, with YAML input, or with
 Bucklescript.
 
-```ocaml
-module My_decoders(D : Decoders.Decode.S) = struct
-  open D
+```reason
+module My_decoders = (D: Decoders.Decode.S) => {
+  open D;
 
-  let role : role decoder =
-    string >>= function
-    | "ADMIN" -> succeed Admin
-    | "USER" -> succeed User
-    | _ -> fail "Expected a role"
+  let role: decoder(role) = (
+    string
+    >>= (
+      fun
+      | "ADMIN" => succeed(Admin)
+      | "USER" => succeed(User)
+      | _ => fail("Expected a role")
+    ):
+      decoder(role)
+  );
 
-  let user : user decoder =
-    let* name = field "name" string in
-    let* roles = field "roles" (list role) in
-    succeed { name; roles }
-end
+  let user: decoder(user) = (
+    {
+      let* name = field("name", string);
+      let* roles = field("roles", list(role));
+      succeed({name, roles});
+    }:
+      decoder(user)
+  );
+};
 
-module My_yojson_decoders = My_decoders(Decoders_yojson.Basic.Decode)
+module My_yojson_decoders = My_decoders(Decoders_yojson.Basic.Decode);
 ```
 
 Great! Let's try them out.
 
-```ocaml
-utop # open My_yojson_decoders;;
-utop # D.decode_string role {| "USER" |};;
+```reason
+rtop # open My_yojson_decoders;
+rtop # D.decode_string(role, {| "USER" |});
 - : (role, error) result = Ok User
 
-utop # D.decode_string D.(field "users" (list user))
+rtop # D.decode_string(D.(field("users", list(user))));
          {| {"users": [{"name": "Alice", "roles": ["ADMIN", "USER"]},
                        {"name": "Bob", "roles": ["USER"]}]}
           |};;
@@ -236,8 +246,8 @@ Ok [{name = "Alice"; roles = [Admin; User]}; {name = "Bob"; roles = [User]}]
 
 Let's introduce an error in the JSON:
 
-```ocaml
-utop # D.decode_string D.(field "users" (list user))
+```reason
+rtop # D.decode_string(D.(field("users", list(user))));
          {| {"users": [{"name": "Alice", "roles": ["ADMIN", "USER"]},
                        {"name": "Bob", "roles": ["SUPER_USER"]}]}
           |};;
@@ -258,34 +268,28 @@ We get a nice pointer that we forgot to handle the `SUPER_USER` role.
 `ocaml-decoders` also has support for defining backend-agnostic encoders, for
 turning your OCaml values into JSON values.
 
-```ocaml
-module My_encoders(E : Decoders.Encode.S) = struct
-  open E
+```reason
+module My_yojson_encoders = My_encoders(Decoders_yojson.Basic.Encode);
 
-  let role : role encoder =
-    function
-    | Admin -> string "ADMIN"
-    | User -> string "USER"
+module E = Decoders_yojson.Basic.Encode;
+open My_yojson_encoders;
+let users = [
+  {name: "Alice", roles: [Admin, User]},
+  {name: "Bob", roles: [User]},
+];
 
-  let user : user encoder =
-    fun u ->
-      obj
-        [ ("name", string u.name)
-        ; ("roles", list role u.roles)
-        ]
-end
-
-module My_yojson_encoders = My_encoders(Decoders_yojson.Basic.Encode)
+E.encode_string(E.obj, [("users", E.list(user, users))]);
 ```
 
-```ocaml
-utop # module E = Decoders_yojson.Basic.Encode;;
-utop # open My_yojson_encoders;;
-utop # let users =
-  [ {name = "Alice"; roles = [Admin; User]}
-  ; {name = "Bob"; roles = [User]}
-  ];;
-utop # E.encode_string E.obj [("users", E.list user users)];;
+```reason
+rtop # module E = Decoders_yojson.Basic.Encode;
+rtop # open My_yojson_encoders;
+rtop # let users = [
+  {name: "Alice", roles: [Admin, User]},
+  {name: "Bob", roles: [User]},
+];
+
+rtop # E.encode_string(E.obj, [("users", E.list(user, users))]);
 - : string =
 "{\"users\":[{\"name\":\"Alice\",\"roles\":[\"ADMIN\",\"USER\"]},{\"name\":\"Bob\",\"roles\":[\"USER\"]}]}"
 ```
