@@ -4,11 +4,11 @@
   "sources": [{
     "dir" : "src",
     "files" : [
-      "encode.mli",
-      "decode.ml",
-      "decode.mli",
-      "decoders.ml",
-      "encode.ml"
+      "encode.rei",
+      "decode.re",
+      "decode.rei",
+      "decoders.re",
+      "encode.re"
     ]
   }, {
     "dir" : "src-bs"
@@ -26,6 +26,5 @@
   "bs-dev-dependencies": ["@glennsl/bs-jest"],
   "warnings": {
     "error" : "+101"
-  },
-  "refmt": 3
+  }
 }
