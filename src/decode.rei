@@ -36,7 +36,7 @@ module type S = {
 
   type decoder('a);
 
-  /** {2 Primitives} */;
+  /** {2 Primitives} */
 
   /** Decode a [string]. */
 
@@ -62,7 +62,7 @@ module type S = {
 
   let value: decoder(value);
 
-  /** {2 Lists} */;
+  /** {2 Lists} */
 
   /** Decode a collection into an OCaml list. */
 
@@ -140,7 +140,7 @@ module type S = {
 
   let uncons: ('a => decoder('b), decoder('a)) => decoder('b);
 
-  /** {1 Object primitives} */;
+  /** {1 Object primitives} */
 
   /** Decode an object, requiring a particular field. */
 
@@ -166,7 +166,7 @@ module type S = {
 
   let at: (list(string), decoder('a)) => decoder('a);
 
-  /** {2 Inconsistent structure} */;
+  /** {2 Inconsistent structure} */
 
   /** [maybe d] is a decoder that always succeeds. If [d] succeeds with [x],
       then [maybe d] succeeds with [Some x], otherwise if [d] fails, then [maybe d]
@@ -201,7 +201,7 @@ module type S = {
 
   let one_of: list((string, decoder('a))) => decoder('a);
 
-  /** {2 Mapping} */;
+  /** {2 Mapping} */
 
   /** Map over the result of a decoder. */
 
@@ -213,7 +213,7 @@ module type S = {
 
   let apply: (decoder('a => 'b), decoder('a)) => decoder('b);
 
-  /** {2 Working with object keys} */;
+  /** {2 Working with object keys} */
 
   /** Decode all of the keys of an object to a list of strings. */
 
@@ -238,7 +238,7 @@ module type S = {
   let key_value_pairs_seq':
     (decoder('k), 'k => decoder('v)) => decoder(list('v));
 
-  /** {2 Fancy decoding} */;
+  /** {2 Fancy decoding} */
 
   /** A decoder that always succeeds with the argument, ignoring the input. */
 
@@ -282,7 +282,7 @@ module type S = {
 
   include (module type of Infix);
 
-  /** {2 Running decoders} */;
+  /** {2 Running decoders} */
 
   /** Run a decoder on some input. */
 
@@ -308,7 +308,7 @@ module type S = {
           |> required "name" string
           |> required "age" int
       ]}
-    */;
+    */
 
     let decode: 'a => decoder('a);
 
@@ -330,7 +330,7 @@ module type S = {
 /** {2 Creating a Decoder implementation}
 
     The following is useful only if you are creating a new Decoder implementation.
-*/;
+*/
 
 /** Signature of things that can be decoded. */
 

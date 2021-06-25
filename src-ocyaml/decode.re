@@ -1,5 +1,4 @@
-/** {2 Ocyaml implementation} */;
-
+/** {2 Ocyaml implementation} */
 open Decoders;
 
 module Yaml_decodeable: Decode.Decodeable with type value = Ocyaml.yaml = {

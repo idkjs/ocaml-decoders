@@ -1,4 +1,4 @@
-/** Turn JSON values into Ocaml values. */;
+/** Turn JSON values into Ocaml values. */
 
 module Decode: {include Decoders.Decode.S with type value = Js.Json.t;};
 

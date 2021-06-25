@@ -11,7 +11,7 @@
         let env = E.make_env ~encoder () in
         E.encode_value encode x env
     ]}
-*/;
+*/
 
 type env;
 
@@ -54,7 +54,7 @@ include Decoders.Encode.S with type value = env => unit;
 
         object_end
     ]}
-*/;
+*/
 
 let (>>): (value, value) => value;
 

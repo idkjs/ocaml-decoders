@@ -1,5 +1,4 @@
-/** {2 Bucklescript Js.Json implementation} */;
-
+/** {2 Bucklescript Js.Json implementation} */
 open Decoders;
 
 type result('good, 'bad) =

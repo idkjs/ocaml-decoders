@@ -1,9 +1,8 @@
-/** {2 Yojson implementation} */;
-
+/** {2 Yojson implementation} */
 open Decoders;
 
-module Json_decodeable: Decode.Decodeable with type value = Yojson.Raw.json = {
-  type value = Yojson.Raw.json;
+module Json_decodeable: Decode.Decodeable with type value = Yojson.Raw.t = {
+  type value = Yojson.Raw.t;
 
   let pp = (fmt, json) =>
     Format.fprintf(fmt, "@[%s@]", Yojson.Raw.pretty_to_string(json));
@@ -111,7 +110,7 @@ module Decode = {
 };
 
 module Json_encodeable = {
-  type value = Yojson.Raw.json;
+  type value = Yojson.Raw.t;
 
   let to_string = json => Yojson.Raw.to_string(json);
 

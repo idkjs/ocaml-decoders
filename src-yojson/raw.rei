@@ -1,9 +1,9 @@
-/** Turn JSON values into Ocaml values. */;
+/** Turn JSON values into Ocaml values. */
 
 module Decode: {
-  include Decoders.Decode.S with type value = Yojson.Raw.json;
+  include Decoders.Decode.S with type value = Yojson.Raw.t;
 
-  /** {2 Yojson.Raw-specific decoders}*/;
+  /** {2 Yojson.Raw-specific decoders}*/
 
   let stringlit: decoder(string);
 
@@ -13,9 +13,9 @@ module Decode: {
 };
 
 module Encode: {
-  include Decoders.Encode.S with type value = Yojson.Raw.json;
+  include Decoders.Encode.S with type value = Yojson.Raw.t;
 
-  /** {2 Yojson.Raw-specific encoders}*/;
+  /** {2 Yojson.Raw-specific encoders}*/
 
   let stringlit: encoder(string);
 

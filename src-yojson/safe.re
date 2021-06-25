@@ -1,5 +1,4 @@
-/** {2 Yojson.Safe implementation} */;
-
+/** {2 Yojson.Safe implementation} */
 open Decoders;
 
 module Json_decodeable: Decode.Decodeable with type value = Yojson.Safe.t = {

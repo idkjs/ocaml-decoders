@@ -1,5 +1,4 @@
-/** Functors for creating Decoders. */;
-
+/** Functors for creating Decoders. */
 open Decoders_util;
 
 type exposed_error('value) =
