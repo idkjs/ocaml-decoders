@@ -1,5 +1,1 @@
 (dirs :standard \ node_modules)
-
-;;;;{BSB GENERATED: NO EDIT
-(include dune.bsb)
-;;;;BSB GENERATED: NO EDIT}
